@@ -3,12 +3,14 @@ import numpy as np
 import random
 import matplotlib.pylab as plt
 import time
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
 
 # physical constants
 mu = 398600.0
 
 def orbit(true_anomaly):
-    eccentricity = 0.70
+    eccentricity = 0.90
     semimajoraxis = 6371 + 100 # km
     if eccentricity < 1.0:
         h = (semimajoraxis * mu * (1.0 -eccentricity**2))**0.5
@@ -17,7 +19,7 @@ def orbit(true_anomaly):
 
     #print(h)
 
-    inclination = 0 * math.pi / 180.0
+    inclination = 40 * math.pi / 180.0
     raan = 0 * math.pi / 180.0
     argument_of_periapsis = 0 * math.pi / 180.0
     #true_anomaly = 30 * math.pi / 180.0
@@ -61,12 +63,16 @@ if __name__ == '__main__':
     # this is just the first step, because this is in earth centered coordinates. next steps will include
     # earth rotations
 
+    # play here and see, how it will jitter!
     random_range_low = -100.0
     random_range_high = 100.0
 
     x = []
     y = []
     z = []
+    xdif = []
+    ydif = []
+    zdif = []
 
 
     file = open("track" + str(int(time.time())) + ".csv", "w")
@@ -91,12 +97,29 @@ if __name__ == '__main__':
         transfer += str(z_dif) + "\n"
         file.write(transfer)
 
-        x.append(R[0,0] + x_dif)
-        y.append(R[0,1] + y_dif)
-        z.append(R[0,2] + z_dif)
+        x.append(R[0,0])
+        y.append(R[0,1])
+        z.append(R[0,2])
+        xdif.append(R[0,0] + x_dif)
+        ydif.append(R[0,1] + y_dif)
+        zdif.append(R[0,2] + z_dif)
     file.close()
 
-    plt.plot(x, y, "*")
+    # plane projecttion
+    plt.plot(xdif, ydif, "*")
     plt.plot(0, 0, "o")
+    plt.plot(x, y)
     plt.grid()
+    plt.show()
+
+    # 3d graph
+    mpl.rcParams['legend.fontsize'] = 10
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot(xdif, ydif, zdif, "*", label='orbit jittery')
+    ax.plot([0.0], [0.0], [0.0], "o", label='center')
+    ax.plot(x, y, z, label='orbit original')
+    ax.legend()
+
     plt.show()
